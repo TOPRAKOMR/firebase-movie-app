@@ -10,7 +10,7 @@ const Register = () => {
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
-    const displayName=`${firstName}+${lastName}`;
+    const displayName=`${firstName} ${lastName}`;
     e.preventDefault();
     createUser(email, password, displayName,navigate);
 

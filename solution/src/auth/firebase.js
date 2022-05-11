@@ -5,15 +5,14 @@ import {
   signInWithEmailAndPassword,
   signOut,
   updateProfile,
-  onAuthStateChanged
-
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from "firebase/auth";
-
 
 //* https://firebase.google.com/docs/auth/web/start
 //* https://console.firebase.google.com/ => project settings
 //! firebase console settings bölümünden firebaseconfig ayarlarını al
-
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_apiKey,
@@ -39,7 +38,7 @@ const app = initializeApp(firebaseConfig);
 // Initialize Firebase Authentication and get a reference to the service
 const auth = getAuth(app);
 
-export const createUser = async (email, password,displayName, navigate) => {
+export const createUser = async (email, password, displayName, navigate) => {
   try {
     //? yeni bir kullanıcı oluşturmak için kullanılan firebase metodu
     let userCredential = await createUserWithEmailAndPassword(
@@ -49,13 +48,12 @@ export const createUser = async (email, password,displayName, navigate) => {
     );
     await updateProfile(auth.currentUser, {
       displayName: displayName,
-    })
+    });
     //? kullanıcı profilini güncellemek için kullanılan firebase metodu
-  
+
     navigate("/");
     console.log(userCredential);
   } catch (err) {
-   
     alert(err.message);
   }
 };
@@ -74,7 +72,6 @@ export const signIn = async (email, password, navigate) => {
     navigate("/");
     console.log(userCredential);
   } catch (err) {
-    
     alert(err.message);
   }
 };
@@ -83,16 +80,26 @@ export const logOut = () => {
   signOut(auth);
 };
 
+export const userObserver = (setCurrentUser) => {
+  onAuthStateChanged(auth, (currentUser) => {
+    if (currentUser) {
+      setCurrentUser(currentUser);
+    } else {
+      // User is signed out
+      setCurrentUser(false);
+    }
+  });
+};
 
-export const userObserver=(setCurrentUser)=>{
-onAuthStateChanged(auth, (currentUser) => {
-  if (currentUser) {
-    setCurrentUser(currentUser)
-    
-  } else {
-    // User is signed out
-    setCurrentUser(false)
-  }
-});
-
-}
+export const signUpProvider = (navigate) => {
+  const provider = new GoogleAuthProvider();
+  signInWithPopup(auth, provider)
+    .then((result) => {
+      console.log(result);
+      navigate("/");
+    })
+    .catch((error) => {
+      // Handle Errors here.
+      console.log(error);
+    });
+};
